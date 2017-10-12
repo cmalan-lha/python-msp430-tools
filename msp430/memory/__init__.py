@@ -129,7 +129,7 @@ class Memory(object):
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    def get_range(self, fromadr, toadr, fill=b'\xff'):
+    def get_range(self, fromadr, toadr, fill='\xff'):
         """\
         Get a range of bytes from the memory. Unavailable values are filled
         with ``fill`` (default 0xff).
@@ -139,8 +139,7 @@ class Memory(object):
         :param fill: Fill value (a byte)
         :return: A byte string covering the given memory range.
         """
-        fill = ord(fill)
-        data = bytearray()
+        res = ''
         toadr = toadr + 1   # python indexes are excluding end, so include it
         while fromadr < toadr:
             for seg in self.segments:
@@ -150,14 +149,14 @@ class Memory(object):
                         catchlength = segend - fromadr
                     else:
                         catchlength = toadr - fromadr
-                    data.extend(seg.data[fromadr - seg.startaddress:fromadr - seg.startaddress + catchlength])
+                    res = res + seg.data[fromadr - seg.startaddress:fromadr - seg.startaddress + catchlength]
                     fromadr = fromadr + catchlength    # adjust start
-                    if len(data) >= toadr - fromadr:
-                        break   # return data
+                    if len(res) >= toadr - fromadr:
+                        break   # return res
             else:   # undefined memory is filled with 0xff
-                data.append(fill)
+                res = res + fill
                 fromadr = fromadr + 1  # adjust start
-        return bytes(data)
+        return bytes(res)
 
     def get(self, address, size):
         """\
